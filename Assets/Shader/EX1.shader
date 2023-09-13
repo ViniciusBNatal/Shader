@@ -49,9 +49,14 @@ Shader "Unlit/EX1"
 				varying vec4 color;
 				varying vec4 vPosition;
 			void main() {
-				vec4 wnormal = gl_ModelViewMatrix * vec4(normal, 0);
 
-				float finalColor = dot(wnormal, _WorldSpaceLightPos0);
+				vec3 wnormal = normalize(
+					vec3(vec4(normal, 0.0) * unity_WorldToObject));
+
+				vec3 lightpos = normalize(
+					vec3(_WorldSpaceLightPos0));
+
+				float finalcolor = dot(wnormal, lightpos);
 
 				if (vUv.y <= .3) {
 					gl_FragColor = texture2D(_MainTex, vUv) * finalColor * vec4(1,0,0,1);
