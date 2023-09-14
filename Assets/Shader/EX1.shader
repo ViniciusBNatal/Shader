@@ -59,13 +59,13 @@ Shader "Unlit/EX1"
 				float finalcolor = dot(wnormal, lightpos);
 
 				if (vUv.y <= .3) {
-					gl_FragColor = texture2D(_MainTex, vUv) * finalColor * vec4(1,0,0,1);
+					gl_FragColor = texture2D(_MainTex, vUv) * finalcolor * vec4(1,0,0,1);
 				}
-				else if (vUv.y > .3 && <= .6) {
-					gl_FragColor = texture2D(_MainTex, vUv) * finalColor * vec4(0, 1, 0, 1);
+				else if (vUv.y > .3 && vUv.y <= .6) {
+					gl_FragColor = texture2D(_MainTex, vUv) * finalcolor * vec4(0, 1, 0, 1);
 				}
 				else {
-					gl_FragColor = texture2D(_MainTex, vUv) * finalColor * vec4(0, 0, 1, 1);
+					gl_FragColor = texture2D(_MainTex, vUv) * finalcolor * vec4(0, 0, 1, 1);
 				}
 
 			}
