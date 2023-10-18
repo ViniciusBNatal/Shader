@@ -1,3 +1,4 @@
+//shader com calculo de luz
 Shader "lit/mylit"
 {
     Properties
