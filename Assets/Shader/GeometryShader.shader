@@ -6,6 +6,7 @@ Shader "Unlit/GeometryShader"
         _Color("Diffuse Material Color", Color) = (1,1,1,1)
         _Heigth("Height", Float) = 1
         _Lenght("Lenght", Float) = 1
+        _Speed("Speed", Float) = 1
     }
         SubShader
     {
@@ -63,6 +64,7 @@ Shader "Unlit/GeometryShader"
             float4 _Color;
             float _Heigth;
             float _Lenght;
+            float _Speed;
             v2g vert(appdata v)
             {
                 v2g o;
@@ -99,23 +101,27 @@ Shader "Unlit/GeometryShader"
                     UNITY_TRANSFER_FOG(o,o.vertex);
                     triStream.Append(o);
                 }*/
-                float4 mov = float4(sin(_Time.z), sin(_Time.z), 1, 1);
+                float4 mov;
+                float4 middlePoint;
                 for (int i = 0; i < 3; i++) {
-                    o.vertex = index[i].vertex + index[0].normal * _Heigth * mov;
+                    mov = float4(sin(_Time.y + o.vertex.x) * _Speed, 0, 0, 0);
+                    //middlePoint = index[0].vertex + index[1].vertex / 2.0;
+                    //o.vertex = (middlePoint - index[0].normal * _Heigth) + mov;
+                    o.vertex = (index[i].vertex - index[0].normal * _Heigth) + mov;
                     o.uv = index[i].uv;
                     o.normal = index[i].normal;
                     o.color = index[i].color;
                     UNITY_TRANSFER_FOG(o, o.vertex);
                     triStream.Append(o);
 
-                    o.vertex = index[i].vertex + float4(_Lenght,0,0,0) * mov;
+                    o.vertex = index[i].vertex + float4(_Lenght,0,0,0);
                     o.uv = index[i].uv;
                     o.normal = index[i].normal;
                     o.color = index[i].color;
                     UNITY_TRANSFER_FOG(o, o.vertex);
                     triStream.Append(o);
 
-                    o.vertex = index[i].vertex - float4(_Lenght, 0, 0, 0) * mov;
+                    o.vertex = index[i].vertex + float4(_Lenght, 0, 0, 0);
                     o.uv = index[i].uv;
                     o.normal = index[i].normal;
                     o.color = index[i].color;
