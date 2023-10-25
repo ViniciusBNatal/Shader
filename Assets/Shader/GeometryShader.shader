@@ -28,6 +28,11 @@ Shader "Unlit/GeometryShader"
 
             #include "UnityCG.cginc"
 
+            float rand(float2 co) 
+            {
+                return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
+            }
+
 
 
             struct appdata
@@ -68,7 +73,8 @@ Shader "Unlit/GeometryShader"
             v2g vert(appdata v)
             {
                 v2g o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
+                //o.vertex = UnityObjectToClipPos(v.vertex);
+                o.vertex = v.vertex;
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 o.normal = v.normal;
                 o.color = v.color;
@@ -83,7 +89,7 @@ Shader "Unlit/GeometryShader"
             {
                 v2g o;
                 for (int i = 0; i < 3; i++) {
-                    o.vertex = index[i].vertex;
+                    o.vertex = UnityObjectToClipPos(index[i].vertex);
                     o.uv = index[i].uv;
                     o.normal = index[i].normal;
                     o.color = index[i].color;
@@ -92,36 +98,29 @@ Shader "Unlit/GeometryShader"
                 }
                 triStream.RestartStrip();
 
-                //float4 faceNormal = float4(normalize(cross(index[1].vertex - index[0].vertex, index[2].vertex - index[0].vertex)), 1);
-
-                /*for (int i = 0; i < 3; i++) {
-                    o.vertex = index[i].vertex + index[i].normal * 0.5 * sin(_Time.z);
-                    o.uv = index[i].uv;
-                    o.normal = index[i].normal;
-                    UNITY_TRANSFER_FOG(o,o.vertex);
-                    triStream.Append(o);
-                }*/
-                float4 mov;
+                float mov;
                 float4 middlePoint;
-                for (int i = 0; i < 3; i++) {
-                    mov = float4(sin(_Time.y + o.vertex.x) * _Speed, 0, 0, 0);
-                    //middlePoint = index[0].vertex + index[1].vertex / 2.0;
-                    //o.vertex = (middlePoint - index[0].normal * _Heigth) + mov;
-                    o.vertex = (index[i].vertex - index[0].normal * _Heigth) + mov;
+                float random;
+
+                for (int i = 0; i < 1; i++) {
+                    mov = cos(_Time.w + index[i].vertex.x) * _Speed;
+                    random = rand(index[i].uv);
+
+                    o.vertex = UnityObjectToClipPos(index[i].vertex + index[i].normal * _Heigth + random * mov);
                     o.uv = index[i].uv;
                     o.normal = index[i].normal;
                     o.color = index[i].color;
                     UNITY_TRANSFER_FOG(o, o.vertex);
                     triStream.Append(o);
 
-                    o.vertex = index[i].vertex + float4(_Lenght,0,0,0);
+                    o.vertex = UnityObjectToClipPos(index[i].vertex) + float4(_Lenght + random,0,0,0);
                     o.uv = index[i].uv;
                     o.normal = index[i].normal;
                     o.color = index[i].color;
                     UNITY_TRANSFER_FOG(o, o.vertex);
                     triStream.Append(o);
 
-                    o.vertex = index[i].vertex + float4(_Lenght, 0, 0, 0);
+                    o.vertex = UnityObjectToClipPos(index[i].vertex) + float4(-_Lenght + random, 0, 0, 0);
                     o.uv = index[i].uv;
                     o.normal = index[i].normal;
                     o.color = index[i].color;
