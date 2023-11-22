@@ -1,72 +1,59 @@
-//shader com calculo de luz
-Shader "lit/mylit"
+Shader "Custom/LitFur"
 {
     Properties
     {
-        _MainTex("Texture", 2D) = "white" {}
+        _MainTex("Base (RGB)", 2D) = "white" {}
+        _FurTex("Base (RGB)", 2D) = "white" {}
+        _Ajust("FurSize",float) = 1
+        _Color("Base Color", Color) = (1,1,1,1)
     }
         SubShader
     {
-        Tags { "RenderType" = "Opaque" }
+        Tags { "RenderType" = "Opaque" "Queue" = "Transparent" }
         LOD 100
-
+        Blend SrcAlpha OneMinusSrcAlpha
         Pass
         {
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-
-
+            #pragma target 2.0
             #include "UnityCG.cginc"
-
-            struct appdata
-            {
+            struct appdata_t {
                 float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
+                float2 texcoord : TEXCOORD0;
                 float4 color:COLOR;
                 float3 normal:NORMAL;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
-
-            struct v2f
-            {
-                float2 uv : TEXCOORD0;
-                UNITY_FOG_COORDS(1)
+            struct v2f {
                 float4 vertex : SV_POSITION;
+                float2 texcoord : TEXCOORD0;
                 float4 color:COLOR;
                 float3 normal:NORMAL;
+                UNITY_VERTEX_OUTPUT_STEREO
             };
-
             sampler2D _MainTex;
             float4 _MainTex_ST;
-
-            v2f vert(appdata v)
+            float4 _Color;
+            v2f vert(appdata_t v)
             {
                 v2f o;
-
-                float3 vertex = v.vertex * float3(1.5, 1, 1)
-                    + float3(0,sin(5.0 * _Time.z + v.vertex.x),0);
-
-                //o.vertex = UnityObjectToClipPos(vertex);
+                UNITY_SETUP_INSTANCE_ID(v);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-
-                float3 norm = float3((2 + sin(5.0 * _Time.z + v.vertex.x)) / 2,5,v.normal.z);
-
-                //o.normal = norm;
-                o.normal = v.normal;
-                o.color = v.color;
-
+                o.texcoord = TRANSFORM_TEX(v.texcoord, _MainTex);
+                UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;
             }
-
             fixed4 frag(v2f i) : SV_Target
             {
                 float3 wnormal = normalize(mul(float4(i.normal, 0.0),unity_WorldToObject)).xyz;
                 float3 lightpos = normalize(_WorldSpaceLightPos0).xyz;
                 float finalcolor = dot(wnormal, lightpos);
-                // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv) * finalcolor*3;
-
+                fixed4 col = tex2D(_MainTex, i.texcoord) * _Color * finalcolor;
+                UNITY_APPLY_FOG(i.fogCoord, col);
+                // UNITY_OPAQUE_ALPHA(col.a);
                 return col;
             }
             ENDCG
