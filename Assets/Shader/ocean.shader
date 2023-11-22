@@ -116,7 +116,7 @@ Shader "lit/ocean"
 
 
                         // sample the texture
-                        fixed4 col = tex2D(_MainTex, i.uv);
+                        fixed4 col = tex2D(_MainTex, i.uv) * finalcolor;
 
 
                         return fixed4(_Color + specularColor, _Color.a);
